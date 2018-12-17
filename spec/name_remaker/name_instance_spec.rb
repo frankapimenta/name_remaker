@@ -137,7 +137,7 @@ RSpec.describe NameRemaker::NameInstance do
       context "sets new given info" do
         context "single info" do
           specify "sets first names" do
-            expect(subject).to receive(:instance_variable_set).with("@first_names", first_names)
+            expect(subject).to receive(:instance_variable_set).with("@first_names", first_names.split(' '))
             subject.__send__ :set_info, first_names: first_names
           end
           specify "has ivar" do
@@ -146,7 +146,7 @@ RSpec.describe NameRemaker::NameInstance do
           end
           specify "has info" do
             subject.__send__ :set_info, first_names: first_names
-            expect(subject.instance_variable_get(:@first_names)).to eq first_names
+            expect(subject.instance_variable_get(:@first_names)).to eq first_names.split(' ')
           end
           specify "has info frozen" do
             subject.__send__ :set_info, first_names: first_names
@@ -163,10 +163,9 @@ RSpec.describe NameRemaker::NameInstance do
     context "#set_first_names" do
       specify { expect(subject.private_methods).to include(:set_first_names) }
       specify { expect(subject.method(:set_first_names).parameters).to eq [[:req, :first_names]] }
-      context "raises error if arguments are not sent as one string or array" do
-        specify { expect { subject.__send__(:set_first_names, 1) }.to raise_error(ArgumentError, "first names must be given as a String or Array") }
-        specify { expect { subject.__send__(:set_first_names, first_names) }.not_to raise_error }
-        specify { expect { subject.__send__(:set_first_names, first_names.split(' ')) }.not_to raise_error }
+      specify "receives -set_info" do
+        expect(subject).to receive(:set_info).with(first_names: first_names)
+        subject.__send__ :set_first_names, first_names
       end
       specify "sets first names in ivar" do
         subject.__send__ :set_first_names, first_names
@@ -177,10 +176,9 @@ RSpec.describe NameRemaker::NameInstance do
     context "#set_last_names" do
       specify { expect(subject.private_methods).to include(:set_last_names) }
       specify { expect(subject.method(:set_last_names).parameters).to eq [[:req, :last_names]] }
-      context "raises error if arguments are not sent as one string or array" do
-        specify { expect { subject.__send__(:set_last_names, 1) }.to raise_error(ArgumentError, "last names must be given as a String or Array") }
-        specify { expect { subject.__send__(:set_last_names, last_names) }.not_to raise_error }
-        specify { expect { subject.__send__(:set_last_names, last_names.split(' ')) }.not_to raise_error }
+      specify "receives -set_info" do
+        expect(subject).to receive(:set_info).with(last_names: last_names)
+        subject.__send__ :set_last_names, last_names
       end
       specify "sets last names in ivar" do
         subject.__send__ :set_last_names, last_names

@@ -65,30 +65,17 @@ module NameRemaker
         end
 
         arguments.each do |key, value|
-          instance_variable_set "@#{key}", value.freeze
+           instance_variable_set("@#{key}", value.freeze) if value.is_a?(Array)
+           instance_variable_set("@#{key}", value.split(' ').freeze) if value.is_a?(String)
         end
       end
 
       def set_first_names first_names
-        if first_names.is_a?(String)
-          @first_names = first_names.split(' ')
-        elsif first_names.is_a?(Array)
-          @first_names = first_names
-        else
-          raise ArgumentError.new("first names must be given as a String or Array")
-        end
-        @first_names.freeze
+        set_info first_names: first_names
       end
 
       def set_last_names last_names
-        if last_names.is_a?(String)
-          @last_names = last_names.split(' ')
-        elsif last_names.is_a?(Array)
-          @last_names = last_names
-        else
-          raise ArgumentError.new("last names must be given as a String or Array")
-        end
-        @last_names.freeze
+        set_info last_names: last_names
       end
   end
 end
