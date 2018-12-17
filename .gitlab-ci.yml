@@ -1,0 +1,72 @@
+stages:
+  - code
+  - build
+  - test
+  - package
+  - review
+  - release
+
+cache: &cache
+  key: "name-remaker-gems"
+  paths:
+    - vendor/cache
+    - Gemfile.lock
+
+bundle:
+  stage: build
+  tags:
+    - toad
+  script:
+    - bundle package --quiet --all
+    - bundle install --local
+  except:
+    - tags
+
+rspec:
+  stage: test
+  tags:
+    - toad
+  script:
+    - rspec --format documentation --format RspecJunitFormatter --out rspec.xml
+  artifacts:
+    reports:
+      junit: rspec.xml
+    paths:
+      - coverage/
+  except:
+    - tags
+  cache:
+    <<: *cache
+    policy: pull
+
+code_quality:
+  stage: test
+  allow_failure: true
+  script:
+    - export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
+    - docker run
+        --env SOURCE_CODE="$PWD"
+        --volume "$PWD":/code
+        --volume /var/run/docker.sock:/var/run/docker.sock
+        "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code
+  artifacts:
+    paths: [gl-code-quality-report.json]
+  cache:
+    <<: *cache
+    paths:
+      - Gemfile.lock
+    policy: pull
+  only:
+    - branches
+
+publish_version:
+  stage: release
+  image: registry.gitlab.slsag.ch/containers/gemrelease:v1.0.0
+  script:
+    - publish
+  cache: {}
+  only:
+    - /^v\d\.\d\.\d(\..*)?$/
+  except:
+    - branches
+

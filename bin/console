@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+ENV["RACK_ENV"] ||= "development"
+
+require "bundler/setup"
+require "name_remaker"
+require "pry"
+
+remaker = NameRemaker.remake first_names: NameRemaker::DEFAULT_FIRST_NAMES, last_names: NameRemaker::DEFAULT_LAST_NAMES
+
+Pry.start
