@@ -56,6 +56,19 @@ module NameRemaker
 
     private
 
+      def set_info **args
+        arguments = *args
+
+        keys, values = args.map(&:first), args.map(&:last)
+        unless values.inject([]) { |res, val| res << val.class}.all? { |klass| klass == String || klass == Array }
+          raise ArgumentError.new("first names must be given as a String or Array")
+        end
+
+        arguments.each do |key, value|
+          instance_variable_set "@#{key}", value.freeze
+        end
+      end
+
       def set_first_names first_names
         if first_names.is_a?(String)
           @first_names = first_names.split(' ')
