@@ -59,7 +59,7 @@ module NameRemaker
       def set_info **args
         arguments = *args
 
-        keys, values = args.map(&:first), args.map(&:last)
+        values = args.map(&:last)
         unless values.inject([]) { |res, val| res << val.class}.all? { |klass| klass == String || klass == Array }
           raise ArgumentError.new("first names must be given as a String or Array")
         end
